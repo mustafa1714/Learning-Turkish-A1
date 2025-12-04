@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Unit } from '../types';
+import { Unit, ReadingItem } from '../types';
 import Flashcard from './Flashcard';
 import Quiz from './Quiz';
 import MatchingGame from './MatchingGame';
-import { ArrowRight, Book, Layers, HelpCircle, AlertCircle, FileText, Search, X, Gamepad2 } from 'lucide-react';
+import ConversationPractice from './ConversationPractice';
+import GrammarTool from './GrammarTool';
+import { ArrowRight, Book, Layers, HelpCircle, AlertCircle, FileText, Search, X, Gamepad2, MessageCircle } from 'lucide-react';
 
 interface LessonViewProps {
   unit: Unit;
@@ -14,6 +16,7 @@ interface LessonViewProps {
 const LessonView: React.FC<LessonViewProps> = ({ unit, onBack, onUnitComplete }) => {
   const [activeTab, setActiveTab] = useState<'vocab' | 'grammar' | 'reading' | 'quiz' | 'game'>('vocab');
   const [searchQuery, setSearchQuery] = useState('');
+  const [practicingReading, setPracticingReading] = useState<ReadingItem | null>(null);
 
   const filteredVocabulary = unit.content.vocabulary.filter(item =>
     item.turkish.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -36,6 +39,7 @@ const LessonView: React.FC<LessonViewProps> = ({ unit, onBack, onUnitComplete })
   const handleTabChange = (tab: 'vocab' | 'grammar' | 'reading' | 'quiz' | 'game') => {
     setActiveTab(tab);
     setSearchQuery('');
+    setPracticingReading(null);
   };
 
   const handleQuizComplete = (score: number) => {
@@ -63,7 +67,7 @@ const LessonView: React.FC<LessonViewProps> = ({ unit, onBack, onUnitComplete })
         </div>
         
         {/* Search Bar - Only show for searchable tabs */}
-        {activeTab !== 'quiz' && activeTab !== 'game' && (
+        {activeTab !== 'quiz' && activeTab !== 'game' && !practicingReading && (
           <div className="container mx-auto px-4 mt-2">
             <div className="relative">
               <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />
@@ -163,6 +167,9 @@ const LessonView: React.FC<LessonViewProps> = ({ unit, onBack, onUnitComplete })
         {/* Grammar Tab */}
         {activeTab === 'grammar' && (
           <div className="animate-fade-in max-w-4xl mx-auto space-y-8">
+            {/* Interactive Tool */}
+            {!searchQuery && <GrammarTool color={unit.color} />}
+
             {filteredGrammar.length > 0 ? filteredGrammar.map((rule, index) => (
               <div key={index} className="bg-white rounded-2xl shadow-md overflow-hidden border border-slate-100">
                 <div className={`p-4 ${unit.color.replace('bg-', 'bg-').replace('500', '50')} border-b border-slate-100`}>
@@ -197,37 +204,56 @@ const LessonView: React.FC<LessonViewProps> = ({ unit, onBack, onUnitComplete })
         {/* Reading Tab */}
         {activeTab === 'reading' && (
           <div className="animate-fade-in max-w-3xl mx-auto space-y-6">
-            {filteredReadings.length > 0 ? filteredReadings.map((reading, index) => (
-              <div key={index} className="bg-white rounded-2xl shadow-md overflow-hidden border border-slate-100">
-                <div className={`p-4 ${unit.color.replace('bg-', 'bg-').replace('500', '100')} flex items-center gap-3`}>
-                  <FileText className={`w-6 h-6 ${unit.color.replace('bg-', 'text-')}`} />
-                  <h3 className="text-xl font-bold text-slate-800">{reading.title}</h3>
-                </div>
-                <div className="p-6 grid gap-6">
-                   <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
-                      <p className="tr-font text-lg text-slate-800 leading-relaxed whitespace-pre-line dir-ltr text-left">
-                        {reading.turkish}
-                      </p>
-                   </div>
-                   <div className="relative">
-                      <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-slate-200"></div>
+            {practicingReading ? (
+              <ConversationPractice 
+                reading={practicingReading}
+                color={unit.color}
+                onBack={() => setPracticingReading(null)}
+              />
+            ) : (
+              <>
+                {filteredReadings.length > 0 ? filteredReadings.map((reading, index) => (
+                  <div key={index} className="bg-white rounded-2xl shadow-md overflow-hidden border border-slate-100 transition-all hover:shadow-lg">
+                    <div className={`p-4 ${unit.color.replace('bg-', 'bg-').replace('500', '100')} flex items-center justify-between`}>
+                      <div className="flex items-center gap-3">
+                        <FileText className={`w-6 h-6 ${unit.color.replace('bg-', 'text-')}`} />
+                        <h3 className="text-xl font-bold text-slate-800">{reading.title}</h3>
                       </div>
-                      <div className="relative flex justify-center text-sm">
-                        <span className="px-2 bg-white text-slate-500">الترجمة</span>
+                      <button 
+                         onClick={() => setPracticingReading(reading)}
+                         className={`bg-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm flex items-center gap-2 hover:bg-slate-50 transition-colors ${unit.color.replace('bg-', 'text-')}`}
+                      >
+                         <MessageCircle className="w-4 h-4" />
+                         ممارسة
+                      </button>
+                    </div>
+                    <div className="p-6 grid gap-6">
+                      <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                          <p className="tr-font text-lg text-slate-800 leading-relaxed whitespace-pre-line dir-ltr text-left">
+                            {reading.turkish}
+                          </p>
+                      </div>
+                      <div className="relative">
+                          <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-slate-200"></div>
+                          </div>
+                          <div className="relative flex justify-center text-sm">
+                            <span className="px-2 bg-white text-slate-500">الترجمة</span>
+                          </div>
+                        </div>
+                      <div>
+                          <p className="text-lg text-slate-600 leading-relaxed whitespace-pre-line">
+                            {reading.arabic}
+                          </p>
                       </div>
                     </div>
-                   <div>
-                      <p className="text-lg text-slate-600 leading-relaxed whitespace-pre-line">
-                        {reading.arabic}
-                      </p>
-                   </div>
-                </div>
-              </div>
-            )) : (
-              <div className="text-center py-12 text-gray-500">
-                 {searchQuery ? `لا توجد نتائج للبحث "${searchQuery}"` : "لا توجد نصوص قراءة إضافية في هذه الوحدة."}
-              </div>
+                  </div>
+                )) : (
+                  <div className="text-center py-12 text-gray-500">
+                    {searchQuery ? `لا توجد نتائج للبحث "${searchQuery}"` : "لا توجد نصوص قراءة إضافية في هذه الوحدة."}
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}

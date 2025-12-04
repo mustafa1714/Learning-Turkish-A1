@@ -42,14 +42,6 @@ const Flashcard: React.FC<FlashcardProps> = ({ item, color }) => {
            <RotateCw className="w-6 h-6 text-slate-400 mt-4" />
         </div>
       </div>
-      
-      {/* CSS for 3D flip effect needed in index.html style or simple style object */}
-      <style>{`
-        .perspective-1000 { perspective: 1000px; }
-        .transform-style-3d { transform-style: preserve-3d; }
-        .backface-hidden { backface-visibility: hidden; }
-        .rotate-y-180 { transform: rotateY(180deg); }
-      `}</style>
     </div>
   );
 };
