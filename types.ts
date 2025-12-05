@@ -1,62 +1,67 @@
-export enum ContentType {
-  VOCABULARY = 'VOCABULARY',
-  GRAMMAR = 'GRAMMAR',
-  READING = 'READING',
-  QUIZ = 'QUIZ'
-}
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  progress: number[]; // Array of completed unit IDs
+export enum ModuleType {
+  VOCABULARY = 'vocabulary',
+  GRAMMAR = 'grammar',
+  CONVERSATION = 'conversation',
+  READING = 'reading',
+  GAME = 'game',
+  QUIZ = 'quiz'
 }
 
 export interface VocabularyItem {
   turkish: string;
+  transliteration?: string;
   arabic: string;
-  pronunciation?: string;
-  image?: string;
+  exampleTr: string;
+  exampleAr: string;
 }
 
 export interface GrammarRule {
   title: string;
-  description: string;
+  explanationTr: string;
+  explanationAr: string;
   examples: { tr: string; ar: string }[];
-  type?: 'harmony-2' | 'harmony-4' | 'general'; // Type for interactive tools
 }
 
-export interface ReadingItem {
+export interface DialogLine {
+  speaker: string;
+  textTr: string;
+  textAr: string;
+}
+
+export interface ReadingSection {
   title: string;
-  turkish: string;
-  arabic: string;
+  imageDescription: string; // Turkish description of the scene
+  contentTr: string;
+  contentAr: string;
 }
 
 export interface QuizQuestion {
   question: string;
   options: string[];
-  correctAnswer: number; // Index of the correct option
+  correctIndex: number;
 }
 
-export interface LessonContent {
-  type: ContentType;
-  vocabulary?: VocabularyItem[];
-  grammar?: GrammarRule;
-  reading?: ReadingItem[];
-  quiz?: QuizQuestion[];
-}
-
-export interface Unit {
+export interface UnitContent {
   id: number;
-  title: string;
-  subtitle: string;
+  titleTr: string;
+  titleAr: string;
   description: string;
-  color: string;
-  icon: string;
-  content: {
-    vocabulary: VocabularyItem[];
-    grammar: GrammarRule[];
-    readings: ReadingItem[];
-    quiz: QuizQuestion[];
-  };
+  vocabulary: VocabularyItem[];
+  grammar: GrammarRule[];
+  dialogue: {
+    title: string;
+    imageDescription: string;
+    lines: DialogLine[];
+  }[];
+  reading: ReadingSection[];
+  manualQuiz: QuizQuestion[];
+}
+
+export interface Course {
+  id: string;
+  titleTr: string;
+  titleAr: string;
+  coverColor: string; // Tailwind color class for UI distinction
+  units: UnitContent[];
 }
