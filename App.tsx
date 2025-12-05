@@ -818,7 +818,7 @@ export default function App() {
             <div className='w-10 h-10 bg-teal-50 rounded-full flex items-center justify-center border border-teal-100 overflow-hidden shadow-sm'>
               {/* <span className="text-xl">🕌</span>  */}
               <img
-                src='assets/logo.webp'
+                src='./assets/logo.webp'
                 alt='Al-Furqan Logo'
                 className='w-8 h-8 object-contain'
               />
